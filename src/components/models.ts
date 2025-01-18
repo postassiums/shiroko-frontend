@@ -1,8 +1,7 @@
-export interface Todo {
-  id: number;
-  content: string;
-}
+export interface Conversation{
+  created_at?: string
+  agent: 'me' | 'shiroko'
+  is_loading: boolean
+  message?: string
 
-export interface Meta {
-  totalCount: number;
 }
