@@ -17,6 +17,9 @@ importers:
       axios:
         specifier: ^1.2.1
         version: 1.7.9
+      dotenv:
+        specifier: ^16.4.7
+        version: 16.4.7
       openai:
         specifier: ^4.79.1
         version: 4.79.1

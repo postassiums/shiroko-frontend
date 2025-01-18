@@ -1,35 +1,40 @@
 <template>
-<q-btn-dropdown
-      split
-      push
-      :color="mic_bg_color"
-      :text-color="mic_fg_color"
-      size="2em"
-      no-caps
-      icon="bi-mic"
-      :disable-main-btn="selected_microphone==undefined"
-      @update:model-value="onToggleMenu"
-      @click="toggleMicrophone"
-    >
-      <q-list>
-        <q-item  @click="selectMicrophone(item)" clickable v-close-popup v-for="item of microphones_options">
-          <q-item-section v-if="item.deviceId==selected_microphone?.deviceId" avatar>
-            <q-icon name="bi-check2" color="black">
+  <div class="tw-relative">
+    <q-btn-dropdown
+          split
+          push
+          :color="mic_bg_color"
+          :text-color="mic_fg_color"
+          size="2em"
+          no-caps
+          icon="bi-mic"
+          :class="$attrs['class']"
+          :disable-main-btn="selected_microphone==undefined"
+          @update:model-value="onToggleMenu"
+          @click="toggleMicrophone"
+        >
 
-            </q-icon>
-          </q-item-section>
-          <q-item-section>
+          <q-list>
+            <q-item  @click="selectMicrophone(item)" clickable v-close-popup v-for="item of microphones_options">
+              <q-item-section v-if="item.deviceId==selected_microphone?.deviceId" avatar>
+                <q-icon name="bi-check2" color="black">
 
-            <q-item-label>
-              {{ item.label }}
-            </q-item-label>
-          </q-item-section>
-        </q-item>
+                </q-icon>
+              </q-item-section>
+              <q-item-section>
+
+                <q-item-label>
+                  {{ item.label }}
+                </q-item-label>
+              </q-item-section>
+            </q-item>
 
 
 
-      </q-list>
-    </q-btn-dropdown>
+          </q-list>
+        </q-btn-dropdown>
+
+  </div>
 
 <!--
 <q-btn @click="toggleMicrophone"  size="2em"  round :color="mic_bg_color"  :text-color="mic_fg_color" icon="bi-mic">
@@ -38,7 +43,7 @@
 </template>
 
 <script setup lang="ts">
-import { notification } from 'src/service';
+import {  notification } from 'src/service';
 import { computed, onMounted, ref, watch } from 'vue';
 import { MicVAD } from '@ricky0123/vad-web';
 let is_speaking=ref(false)
@@ -57,20 +62,27 @@ onMounted(async()=>{
 
 
 
+
 })
-const mic_bg_color=computed(()=>is_using_microphone.value ? 'red' : 'white')
+const mic_bg_color=computed(()=>  is_using_microphone.value ? is_speaking.value ? 'blue' : 'red' : 'white')
 const mic_fg_color=computed(()=>is_using_microphone.value ? 'white' : 'black')
 
 async function initializeVad()
 {
   vad=await MicVAD.new({
 
-  onSpeechStart() {
+    // additionalAudioConstraints:{
+    //   sampleRate: 2400
+    // },
+
+  onSpeechStart: ()=> {
     is_speaking.value=true
   },
 
-  onSpeechEnd(audio) {
+  onSpeechEnd: async (audio) =>{
+
     emit('speech_end',audio)
+
     is_speaking.value=false
   },})
 }
@@ -119,6 +131,7 @@ async function toggleMicrophone()
   {
     const mic_stream=await getMicrophoneStream()
     mic_stream.getAudioTracks().forEach(track=>track.enabled=false)
+    vad.pause()
     return
   }
   const mic_stream=await getMicrophoneStream()
