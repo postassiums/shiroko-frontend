@@ -58,7 +58,7 @@ export default defineConfig((ctx) => {
 
       // publicPath: '/',
       // analyze: true,
-      // env: {},
+      // env: require('dotenv').,
       // rawDefine: {}
       // ignorePublicFolder: true,
       // minify: false,

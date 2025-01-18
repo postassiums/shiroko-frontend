@@ -14,6 +14,7 @@ let canvas=ref()
 const canvas_context=ref<CanvasRenderingContext2D>(canvas.value?.getContext('2d'))
 const audio_context=new AudioContext()
 const audio_analyzer=audio_context.createAnalyser()
+let source : MediaStreamAudioSourceNode
 let visual : number
 
 
@@ -42,7 +43,11 @@ function resetAnimation()
 async function updateAudioAnalyzer()
 {
   const media=await navigator.mediaDevices.getUserMedia({audio: {deviceId: props.deviceId}})
-  const source=audio_context.createMediaStreamSource(media)
+  if(source!=undefined)
+  {
+    source.disconnect(audio_analyzer)
+  }
+  source=audio_context.createMediaStreamSource(media)
   source.connect(audio_analyzer)
 
 }
@@ -62,6 +67,11 @@ function draw() {
   const buffer_length=audio_analyzer.frequencyBinCount
   const data_array=new Uint8Array(audio_analyzer.frequencyBinCount)
   audio_analyzer.getByteTimeDomainData(data_array);
+  if(canvas_context.value==undefined)
+  {
+    cancelAnimationFrame(visual)
+    return
+  }
   visual=requestAnimationFrame(draw)
   canvas_context.value.beginPath();
 
