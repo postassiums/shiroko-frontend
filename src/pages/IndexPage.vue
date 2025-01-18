@@ -1,12 +1,11 @@
 <template>
   <q-page padding >
-    <SpeechContainer @speech_end="transcribeText" >
+    <SpeechContainer @speech_end="setupTranscription" >
 
     </SpeechContainer>
-    <q-input clearable  :loading="is_transcribing"
-    label="Transcribed Text" class="q-mt-xl" disable filled bg-color="white" v-model="transcription" autogrow type="textarea">
+    <TranscriptionInput v-if="base64_data!=undefined" :data="base64_data" >
 
-    </q-input>
+    </TranscriptionInput>
 
   </q-page>
 
@@ -15,47 +14,20 @@
 </template>
 
 <script setup lang="ts">
+import TranscriptionInput from 'src/components/TranscriptionInput.vue';
 import SpeechContainer from 'src/components/SpeechContainer.vue';
 import { chatgpt } from 'src/service';
 import { ref } from 'vue';
 
-let transcription=ref()
-let is_transcribing=ref(false)
+let base64_data=ref()
 
-async function transcribeText(audio : Float32Array<ArrayBufferLike>,base64 : string )
+async function setupTranscription(audio : Float32Array<ArrayBufferLike>,base64 : string )
 {
-  try{
-    is_transcribing.value=true
-    const file=base64ToFile(base64,'audio.wav')
-    const response=await chatgpt().audio.transcriptions.create({model: 'whisper-1',file})
-    transcription.value=response.text
-
-  }catch(e)
-  {
-    console.error(e)
-  }finally{
-    is_transcribing.value=false
-  }
+  base64_data.value=base64
 
 }
 
-function base64ToFile(base64_file : string, fileName : string) {
 
-
-  const mime_type='audio/wav'
-
-
-  const byteString = atob(base64_file);
-
-
-  const byteArray = new Uint8Array(byteString.length);
-  for (let i = 0; i < byteString.length; i++) {
-    byteArray[i] = byteString.charCodeAt(i);
-  }
-
-
-  return new File([byteArray], fileName, { type: mime_type });
-}
 
 
 </script>
