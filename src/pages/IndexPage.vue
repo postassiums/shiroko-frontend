@@ -1,8 +1,15 @@
 <template>
   <q-page padding >
-    <SpeechContainer @speech_end="onSpeechStop" >
+    <div class="tw-flex tw-items-center">
+      <SpeechContainer @speech_end="onSpeechStop" >
 
-    </SpeechContainer>
+      </SpeechContainer>
+
+      <ShareScreenButton>
+
+      </ShareScreenButton>
+
+    </div>
 
 
     <ChatBubbles v-if="conversations.length>0" :conversations="conversations">
@@ -22,6 +29,7 @@ import { chatgpt } from 'src/service';
 import { ref } from 'vue';
 import { Conversation } from 'src/components/models';
 import ChatBubbles from 'src/components/ChatBubbles.vue';
+import ShareScreenButton from 'src/components/ShareScreenButton.vue';
 
 
 let conversations=ref<Conversation[]>([])
