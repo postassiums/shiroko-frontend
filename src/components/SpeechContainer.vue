@@ -1,5 +1,5 @@
 <template>
-  <div class="tw-flex tw-items-center">
+  <div class="tw-flex tw-items-center tw-w-[min-content]">
 
     <Microphone @speech_end="setupOutputAudio" class="q-mr-xl" @microphone_update="onSelectNewMicrophone" ></Microphone>
     <Osciloscope ref="osciloscope" v-if="device_id!=undefined" :device-id="device_id">
