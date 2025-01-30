@@ -1,0 +1,19 @@
+name: shiroko
+services:
+  app:
+    build:
+      context: .
+    container_name: shiroko_frontend
+    command: --port $PORT
+    ports:
+      - $PORT:$PORT
+    volumes:
+      - .:/app
+      - /app/node_modules
+    networks:
+      - shiroko-net
+networks:
+  shiroko-net:
+    external: true
+    name: shiroko-net
+      
