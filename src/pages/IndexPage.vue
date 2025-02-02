@@ -1,20 +1,17 @@
 <template>
-  <q-page padding >
-    <div class="tw-flex tw-items-center">
-      <SpeechContainer @speech_end="onSpeechStop" >
+  <q-page class="q-pb-none" padding >
+    <div >
+      <ChatBubbles ref="chat_bubbles"  >
 
-      </SpeechContainer>
 
-      <ShareScreenButton>
+      </ChatBubbles>
+      <ChatInput @enter="onSendPrompt">
 
-      </ShareScreenButton>
+      </ChatInput>
 
     </div>
 
 
-    <ChatBubbles v-if="conversations.length>0" :conversations="conversations">
-
-    </ChatBubbles>
 
   </q-page>
 
@@ -23,64 +20,36 @@
 </template>
 
 <script setup lang="ts">
-import TranscriptionInput from 'src/components/TranscriptionInput.vue';
-import SpeechContainer from 'src/components/SpeechContainer.vue';
-import { chatgpt } from 'src/service';
-import { ref } from 'vue';
-import { Conversation } from 'src/components/models';
+
+
+
+import ChatInput from 'src/components/ChatInput.vue';
+
 import ChatBubbles from 'src/components/ChatBubbles.vue';
-import ShareScreenButton from 'src/components/ShareScreenButton.vue';
+
+import { ref } from 'vue';
 
 
-let conversations=ref<Conversation[]>([])
+
+let chat_bubbles=ref<InstanceType<typeof ChatBubbles>>()
 
 
-async function onSpeechStop(audio : Float32Array<ArrayBufferLike>,base64 : string )
+
+
+async function onSendPrompt(prompt : string)
 {
-  try{
-    conversations.value.push({agent: 'me',is_loading: true})
-    const user_text=await transcribeText(base64)
-    conversations.value.pop()
-    conversations.value.push({agent: 'me',message: user_text,is_loading: false})
-  }catch(e)
+  if(chat_bubbles.value==undefined)
   {
-    conversations.value.pop()
-    console.error(e)
-
+    console.warn('Component chatbubbles was not initialized')
+    return
   }
+  await chat_bubbles.value.addUserBubble(prompt)
+  await chat_bubbles.value.addShirokoBubble(prompt)
 
 
 }
 
-async function transcribeText(base64: string)
-{
 
-  const file=base64ToFile(base64,'audio.wav')
-  const response=await chatgpt().audio.transcriptions.create({model: 'whisper-1',file})
-  return response.text
-
-
-
-
-}
-
-function base64ToFile(base64_file : string, fileName : string) {
-
-
-  const mime_type='audio/wav'
-
-
-  const byteString = atob(base64_file);
-
-
-  const byteArray = new Uint8Array(byteString.length);
-  for (let i = 0; i < byteString.length; i++) {
-    byteArray[i] = byteString.charCodeAt(i);
-  }
-
-
-  return new File([byteArray], fileName, { type: mime_type });
-}
 
 
 </script>
