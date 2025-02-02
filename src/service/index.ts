@@ -9,9 +9,3 @@ export function notification(message: string,type: 'negative' | 'positive' | 'wa
 }
 
 
-export function chatgpt()
-{
-  const openai=new OpenAI({apiKey: process.env.OPENAI_KEY,dangerouslyAllowBrowser: true})
-
-  return openai
-}
