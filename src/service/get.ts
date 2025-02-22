@@ -13,3 +13,4 @@ export async function getAudioFromConversation(id : string)
   const response=await api.get(`/conversations/audio/${id}`,{responseType: 'stream'})
   return response.data
 }
+

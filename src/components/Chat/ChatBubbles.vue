@@ -1,14 +1,13 @@
 <template>
+
   <div class="tw-relative q-mb-lg">
 
-    <audio ref="audio_element" :src="audio_src" class="tw-hidden">
 
-    </audio>
-
-    <q-scroll-area id="conversationArea" ref="scroll_area" class="q-pa-md q-pt-none"  style="height: 85vh; width: 100%;">
+    <q-scroll-area id="conversationArea" ref="scroll_area" class="q-pa-md q-pt-none"
+     style="height: 85vh; width: 100%;">
       <q-infinite-scroll  :offset="20" @load="loadConversations" :initial-index="0" reverse >
-      <div  class="row justify-center q-mt-lg tw-w-full tw-flex-wrap">
-        <div    >
+      <div  >
+
 
           <q-chat-message v-for="item of conversations"
             :sent="isUserTurn(item)"
@@ -19,30 +18,31 @@
           >
 
           <template #avatar>
-            <img  class="q-message-avatar q-message-avatar--sent" width="64px" height="64px" :src="getAvatar(item)" >
+            <Avatar :conversation="item">
 
-            </img>
+            </Avatar>
           </template>
           <template #name>
-            <span class="text-white tw-text-[1.25em]"> {{getName(item)}}</span>
+            <Name :conversation="item">
+
+            </Name>
+
 
           </template>
           <div>
+            <Content :conversation="item">
 
-            <div class="tw-w-full tw-h-full"   v-if="('content' in item) && !isSendingMessage(item)">
-              <q-icon class="q-mr-md" size="2em" color="white" name="bi-exclamation-circle-fill"  v-if="isError(item.content)"></q-icon>
-              <span class="tw-text-[1.25em]" >{{getContent(item.content)}}</span>
+            </Content>
 
-            </div>
-
-            <q-spinner-dots v-if="isSendingMessage(item)" size="2em" />
             <div class="tw-w-full tw-items-center tw-flex tw-justify-between q-mt-sm">
-              <span v-if="'created_at' in item"
-              :class="isUserTurn(item) ? 'text-black' : 'text-white' " class="tw-text-[0.9em] tw-opacity-[0.8]">{{ getTimeStamp(item) }}</span>
+              <TimeStamp v-if="'created_at' in item" :conversation="item">
 
-              <q-btn v-if="item.role=='assistent'&& '_id' in item" @click="playSpeech(item._id)" size="1ch" text-color="white" round icon="bi-volume-up-fill" unelevated color="transparent">
+              </TimeStamp>
+              <AudioComponent @updated_voice="onVoiceUpdated" :conversation="item">
 
-              </q-btn>
+              </AudioComponent>
+
+
 
             </div>
           </div>
@@ -58,7 +58,7 @@
           </q-chat-message>
 
 
-      </div>
+
 
 
 
@@ -89,31 +89,29 @@
 <script setup lang="ts">
 import { parse } from 'path';
 import { QScrollArea } from 'quasar';
-import {PendingConversation, Conversation, ChatBotRoles, ChatNames, ConversationResponse} from 'src/components/models'
+import {PendingConversation, Conversation, ChatBotRoles, ChatNames, ConversationResponse, VoiceState, VoiceResponse, ConversationWithVoice} from 'src/components/models'
 import { notification } from 'src/service';
-import { getConversations } from 'src/service/get';
+import Avatar from './Avatar.vue';
+import Name from './Name.vue';
+import Content from './Content.vue';
+import { getConversations, getConversations as postConversationAudio } from 'src/service/get';
 import { postConversation, promptLLM } from 'src/service/post';
-import { onMounted, ref } from 'vue';
-import { scroll } from 'quasar';
-import { off } from 'process';
-import { Page } from 'openai/pagination.mjs';
-let audio_src=ref()
-let audio_element=ref<HTMLAudioElement>()
+import { onMounted, Ref, ref } from 'vue';
+import TimeStamp from './TimeStamp.vue';
+import AudioComponent from './AudioComponent.vue';
+import { isConversationResponse } from '../helper';
+
+
 let scroll_area=ref<QScrollArea>()
 
 let is_fetching_conversation=ref(false)
 let conversations=ref<Conversation[] >([])
 
+const emit=defineEmits<{answered: []}>()
 
 
 
 
-function getTimeStamp(item : ConversationResponse)
-{
-
-  const new_date=new Date(item.created_at)
-  return new_date.toLocaleString('pt-BR')
-}
 
 function scrollToBottom()
 {
@@ -154,7 +152,7 @@ async function putLLMConversationBitByBit(reader: ReadableStreamDefaultReader<Ui
     const decoder=new TextDecoder("utf-8");
     const response=new Uint8Array(value)
     const decoded_response=decoder.decode(response)
-    AppendLastConversationContent(decoded_response)
+    appendLastConversationContent(decoded_response)
 
 
 
@@ -185,6 +183,7 @@ async function addShirokoBubble(prompt : string)
     setErrorMessageToLastConversation(new_conversation)
     console.error(e)
   }
+  emit('answered')
 
 
 }
@@ -215,15 +214,8 @@ function isError(content : Conversation['content'])
   return content!=undefined && typeof content!=='string' && 'error' in content
 }
 
-function getContent(content: Conversation['content'])
-{
-  if(content!=undefined)
-  {
-    return typeof content==='string' ? content : content.error
-  }
-}
 
-function AppendLastConversationContent(new_contet: string)
+function appendLastConversationContent(new_contet: string)
 {
   const last_index=conversations.value.length-1
   if(conversations.value[last_index]!=undefined)
@@ -238,7 +230,16 @@ function changeLastConversation(new_conversation : Conversation)
   conversations.value[target_index==0 ? 0 : target_index-1]={...new_conversation}
 }
 
-
+function onVoiceUpdated(id : string,new_response : ConversationWithVoice)
+{
+  const found_index=conversations.value.findIndex(item=>isConversationResponse(item) ? item._id==id : false)
+  if(found_index==-1)
+  {
+    console.warn('Conversation was not found, not updating')
+    return
+  }
+  conversations.value.splice(found_index,1,new_response)
+}
 
 async function loadConversations(page=1,done : (stop : boolean)=>void)
 {
@@ -265,30 +266,23 @@ async function loadConversations(page=1,done : (stop : boolean)=>void)
 }
 
 
-function isSendingMessage(item : Conversation)
-{
-  return 'is_loading' in item && item.is_loading
-}
 
 
 function isUserTurn(item : Conversation)
 {
   return item.role!=ChatBotRoles.ASSISTENT
 }
-function getName(item : Conversation)
-{
-  return item.role==ChatBotRoles.ASSISTENT ? ChatNames.ASSISTENT:  ChatNames.USER
-}
 
-function getAvatar(item: Conversation)
-{
-  return item.role==ChatBotRoles.ASSISTENT ? 'icons/Shiroko_Icon.webp' : 'https://www.gravatar.com/avatar'
-}
 
-async function playSpeech(id : string)
-{
 
-}
+
+
+
+
+
+
+
+
 
 
 </script>

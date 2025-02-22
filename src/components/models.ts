@@ -1,4 +1,5 @@
 import { Chat } from "openai/resources/index.mjs"
+import { Ref } from "vue"
 
 export enum ChatNames{
   USER='Me',
@@ -11,6 +12,26 @@ export enum ChatBotRoles{
   DEVELOPER='developer'
 
 }
+
+export enum AudioIcons{
+  IDLE='bi-volume-up-fill',
+  STOP='bi-stop-circle'
+}
+
+
+export interface VoiceState{
+  is_loading: boolean
+  is_playing: boolean
+}
+
+export interface VoiceResponse{
+  url: string
+  expires_at : string
+
+
+}
+
+
 
 
 type ChatContent= string | {error: string}
@@ -32,6 +53,15 @@ export interface PendingConversation{
 export type Conversation=(PendingConversation | ConversationResponse )
 
 export interface ConversationResponse extends ID,TimeStamp,NonNullable<Pick<PendingConversation,'content' | 'role'>>{
+  voice: VoiceResponse | null
+
+}
+export interface ConversationProps{
+  conversation: Conversation
+}
+
+export interface ConversationWithVoice extends ConversationResponse{
+  voice: VoiceResponse
 
 }
 
