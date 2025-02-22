@@ -1,11 +1,11 @@
 <template>
   <q-page class="q-pb-none" padding >
     <div >
-      <ChatBubbles ref="chat_bubbles"  >
+      <ChatBubbles @answered="onFinishedAnswering" ref="chat_bubbles"  >
 
 
       </ChatBubbles>
-      <ChatInput @enter="onSendPrompt">
+      <ChatInput ref="chat_input" @enter="onSendPrompt">
 
       </ChatInput>
 
@@ -25,16 +25,19 @@
 
 import ChatInput from 'src/components/ChatInput.vue';
 
-import ChatBubbles from 'src/components/ChatBubbles.vue';
+import ChatBubbles from '../components/Chat/ChatBubbles.vue';
 
-import { ref } from 'vue';
-
-
-
-let chat_bubbles=ref<InstanceType<typeof ChatBubbles>>()
+import { ref, useTemplateRef } from 'vue';
 
 
+let chat_bubbles=useTemplateRef('chat_bubbles')
 
+let chat_input=useTemplateRef('chat_input')
+
+function onFinishedAnswering()
+{
+  chat_input.value?.reactivateInput()
+}
 
 async function onSendPrompt(prompt : string)
 {
