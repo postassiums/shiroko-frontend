@@ -5,7 +5,7 @@
 
      </q-btn>
      <audio @pause="onPauseAudio" v-if="isConversationWithVoiceDefined(conversation)"
-     ref="audio_element" :src="conversation.voice.url" class="tw-hidden">
+     ref="audio_element" :src="conversation.voice.rvc_tts.url" class="tw-hidden">
      </audio>
 
   </div>
@@ -15,7 +15,7 @@
 
 <script setup lang="ts">
 import { computed, ref, ShallowRef, useTemplateRef } from 'vue';
-import { AudioIcons, ChatBotRoles, Conversation, ConversationProps, ConversationResponse, ConversationWithVoice, VoiceResponse, VoiceState } from '../models';
+import { AudioIcons, ChatBotRoles, Conversation, ConversationProps, ConversationResponse, ConversationWithVoice, MinioItemResponse, VoiceState } from '../models';
 import { postConversationVoice } from 'src/service/post';
 import { isConversationResponse, isConversationWithVoiceDefined } from '../helper';
 
@@ -39,7 +39,7 @@ function onPauseAudio()
   is_playing.value=false
 }
 
-function isVoiceExpired(voice : VoiceResponse){
+function isVoiceExpired(voice : MinioItemResponse){
   let today=new Date()
 
   const expired_at=new Date(voice.expires_at)
@@ -84,7 +84,7 @@ async function onPlayClick(conversation : ConversationResponse)
     stopAudio()
     return
   }
-  const need_setup_new_audio=(isConversationWithVoiceDefined(conversation) && isVoiceExpired(conversation.voice))
+  const need_setup_new_audio=(isConversationWithVoiceDefined(conversation) && isVoiceExpired(conversation.voice.rvc_tts))
   || conversation.voice==null
   if(need_setup_new_audio)
   {

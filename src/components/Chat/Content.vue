@@ -14,7 +14,8 @@ import { ConversationProps } from '../models';
 
 const props=defineProps<ConversationProps>()
 
-const get_content=computed(()=>typeof props.conversation.content==='string' ? props.conversation.content : props.conversation.content.error)
+const get_content=computed(()=>typeof props.conversation.content==='string'
+? props.conversation.content : props.conversation.content?.error)
 
 const is_sending_message=computed(()=>'is_loading' in props.conversation && props.conversation.is_loading)
 
