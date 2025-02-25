@@ -23,8 +23,11 @@ export interface VoiceState{
   is_loading: boolean
   is_playing: boolean
 }
-
 export interface VoiceResponse{
+  normal_tts: MinioItemResponse
+  rvc_tts: MinioItemResponse
+}
+export interface MinioItemResponse{
   url: string
   expires_at : string
 

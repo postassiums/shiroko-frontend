@@ -89,7 +89,7 @@
 <script setup lang="ts">
 import { parse } from 'path';
 import { QScrollArea } from 'quasar';
-import {PendingConversation, Conversation, ChatBotRoles, ChatNames, ConversationResponse, VoiceState, VoiceResponse, ConversationWithVoice} from 'src/components/models'
+import {PendingConversation, Conversation, ChatBotRoles, ChatNames, ConversationResponse, VoiceState, MinioItemResponse, ConversationWithVoice} from 'src/components/models'
 import { notification } from 'src/service';
 import Avatar from './Avatar.vue';
 import Name from './Name.vue';
