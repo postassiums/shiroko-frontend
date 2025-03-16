@@ -7,7 +7,7 @@ export function isConversationResponse(conversation : Conversation) : conversati
 
 export function isConversationWithVoiceDefined(conversation : ConversationResponse) : conversation is ConversationWithVoice
 {
-  return 'voice' in conversation && conversation.voice!=null
+  return 'voice' in conversation && conversation.voice!=null && conversation.voice.parts.length>0
 }
 
 

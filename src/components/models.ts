@@ -25,7 +25,7 @@ export interface VoiceState{
 }
 export interface VoiceResponse{
   total_parts: number
-  full: MinioItemResponse
+  parts: MinioItemResponse[]
 }
 export interface MinioItemResponse{
   url: string
@@ -37,7 +37,6 @@ export interface MinioItemResponse{
 export interface VoiceAvailableReponse{
   total_parts: number
 }
-
 
 type ChatContent= string | {error: string}
 

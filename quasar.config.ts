@@ -111,6 +111,9 @@ export default defineConfig((ctx) => {
 
       ]
     },
+    htmlVariables:{
+      title: 'Shiroko Frontend'
+    },
 
     // animations: 'all', // --- includes all animations
     // https://v2.quasar.dev/options/animations
@@ -152,6 +155,7 @@ export default defineConfig((ctx) => {
       // pwaExtendGenerateSWOptions (cfg) {},
       // pwaExtendInjectManifestOptions (cfg) {}
     },
+
 
     // https://v2.quasar.dev/quasar-cli-vite/developing-pwa/configuring-pwa
     pwa: {

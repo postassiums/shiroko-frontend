@@ -38,7 +38,7 @@
               <TimeStamp v-if="'created_at' in item" :conversation="item">
 
               </TimeStamp>
-              <AudioComponent @updated_voice="onVoiceUpdated" :conversation="item">
+              <AudioComponent v-if="isConversationResponse(item)"  @updated_voice="onVoiceUpdated" :conversation="item">
 
               </AudioComponent>
 
@@ -99,7 +99,7 @@ import { postConversation, promptLLM } from 'src/service/post';
 import { onMounted, Ref, ref } from 'vue';
 import TimeStamp from './TimeStamp.vue';
 import AudioComponent from './AudioComponent.vue';
-import { isConversationResponse } from '../helper';
+import { isConversationResponse, isConversationWithVoiceDefined } from '../helper';
 
 
 let scroll_area=ref<QScrollArea>()
@@ -192,6 +192,7 @@ function setErrorMessageToLastConversation(new_conversation : Conversation)
 {
   changeLastConversation({...new_conversation,content: {error: 'An unexpected error occored, please try again later'},is_loading: false})
 }
+
 
 async function addUserBubble(prompt : string)
 {
