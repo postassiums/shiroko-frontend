@@ -24,8 +24,8 @@ export interface VoiceState{
   is_playing: boolean
 }
 export interface VoiceResponse{
-  normal_tts: MinioItemResponse
-  rvc_tts: MinioItemResponse
+  total_parts: number
+  full: MinioItemResponse
 }
 export interface MinioItemResponse{
   url: string
@@ -34,7 +34,9 @@ export interface MinioItemResponse{
 
 }
 
-
+export interface VoiceAvailableReponse{
+  total_parts: number
+}
 
 
 type ChatContent= string | {error: string}

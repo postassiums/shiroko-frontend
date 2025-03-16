@@ -5,7 +5,7 @@
 
      </q-btn>
      <audio @pause="onPauseAudio" v-if="isConversationWithVoiceDefined(conversation)"
-     ref="audio_element" :src="conversation.voice.rvc_tts.url" class="tw-hidden">
+     ref="audio_element" :src="conversation.voice.full.url" class="tw-hidden">
      </audio>
 
   </div>
@@ -15,7 +15,7 @@
 
 <script setup lang="ts">
 import { computed, ref, ShallowRef, useTemplateRef } from 'vue';
-import { AudioIcons, ChatBotRoles, Conversation, ConversationProps, ConversationResponse, ConversationWithVoice, MinioItemResponse, VoiceState } from '../models';
+import { AudioIcons, ChatBotRoles, Conversation, ConversationProps, ConversationResponse, ConversationWithVoice, MinioItemResponse, VoiceAvailableReponse, VoiceState } from '../models';
 import { postConversationVoice } from 'src/service/post';
 import { isConversationResponse, isConversationWithVoiceDefined } from '../helper';
 
@@ -84,7 +84,7 @@ async function onPlayClick(conversation : ConversationResponse)
     stopAudio()
     return
   }
-  const need_setup_new_audio=(isConversationWithVoiceDefined(conversation) && isVoiceExpired(conversation.voice.rvc_tts))
+  const need_setup_new_audio=(isConversationWithVoiceDefined(conversation) && isVoiceExpired(conversation.voice.full))
   || conversation.voice==null
   if(need_setup_new_audio)
   {
@@ -108,9 +108,15 @@ async function setupNewAudio(id : string)
 {
   try{
     is_loading.value=true
-    const response=await postConversationVoice(id)
+    const audio_websocket=new WebSocket(`ws://${process.env.API_URL}/conversations/${id}/voice/ws`)
+    audio_websocket.addEventListener('message',(event)=>{
+      const data=event.data
+      console.log(data)
 
-    emit('updated_voice',id,response)
+
+    })
+
+    // emit('updated_voice',id,response)
 
 
 
